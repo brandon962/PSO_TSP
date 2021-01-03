@@ -1,11 +1,12 @@
 #include "psotsp.h"
-psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _alpha, double _beta, string _inputfile)
+psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _decay, double _alpha, double _beta, string _inputfile)
 {
     srand(time(NULL));
     runs = _runs;
     iters = _iters;
     popsize = _popsize;
     cities = _sol_size;
+    decay = _decay;
     alpha = _alpha;
     beta = _beta;
     inputfile = _inputfile;
@@ -22,6 +23,7 @@ void psotsp::run()
         {
             transistion();
             evaluation();
+            printALLfit();
         }
     }
 }
@@ -30,7 +32,6 @@ void psotsp::initialization()
 {
 
     initialvector();
-    e_count = 0;
     // readfile
     fp = fopen(inputfile.c_str(), "r");
     for (int i = 0; i < cities; i++)
@@ -87,7 +88,13 @@ void psotsp::initialization()
             swap(solution[i][r1], solution[i][r2]);
         }
     }
+
+    global_fit = DBL_MAX;
     printAllpath();
+    evaluation();
+    printALLfit();
+    e_count = 0;
+    p_count = 0;
 }
 
 void psotsp::sol2path()
@@ -105,6 +112,7 @@ void psotsp::sol2path()
         // path[i][j] = (int)solution[i][j] with no repeat, if repeat path[i][j] still be -1
         for (int j = 0; j < cities; j++)
         {
+            cout << (int)solution[i][j] << endl;
             if (choosen[(int)solution[i][j]] == 0)
             {
                 choosen[(int)solution[i][j]] = 1;
@@ -137,13 +145,19 @@ void psotsp::printAllpath()
     }
 }
 
+void psotsp::printALLfit()
+{
+    for (int i = 0; i < popsize; i++)
+        cout << fitness[i] << endl;
+}
+
 void psotsp::initialvector()
 {
     solution.assign(popsize, d1d(cities, 0));
     fitness.assign(popsize, 0);
     global_best.assign(cities, 0);
-    personal_best.assign(popsize, d1d(cities, 0));
-    personal_fit.assign(popsize, 0);
+    personal_best.assign(popsize, i1d(cities, 0));
+    personal_fit.assign(popsize, DBL_MAX);
     place.assign(cities, i1d(2, 0));
     speed.assign(popsize, d1d(cities, 0));
     choosen.assign(cities, 0);
@@ -152,13 +166,69 @@ void psotsp::initialvector()
 
 double psotsp::distance(int x1, int x2)
 {
+    p_count++;
     return sqrt(pow((place[x1][0] - place[x2][0]), 2) + pow((place[x1][1] - place[x2][1]), 2));
 }
 
 void psotsp::transistion()
 {
+    double r1;
+    // count the particle speed v = w*v + a*r*(gb-x) + b*r*(pb-x)
+    for (int i = 0; i < popsize; i++)
+    {
+        for (int j = 0; j < cities; j++)
+        {
+            speed[i][j] = decay * speed[i][j];
+            r1 = (rand() / (RAND_MAX + 1.0));
+            speed[i][j] += alpha * r1 * (global_best[j] - solution[i][j]);
+            r1 = (rand() / (RAND_MAX + 1.0));
+            speed[i][j] += beta * r1 * (personal_best[i][j] - solution[i][j]);
+        }
+    }
+
+    // count particle new place x = x + v, if out of range equal random number
+    for (int i = 0; i < popsize; i++)
+    {
+        for (int j = 0; j < cities; j++)
+        {
+            // cout << solution[i][j] << " ";
+            solution[i][j] += speed[i][j];
+            if (solution[i][j] < 0)
+                solution[i][j] = rand()%cities;
+            cout << solution[i][j] << " ";
+            // solution[i][j] > (cities + 1) ? solution[i][j] = rand() % cities : solution[i][j] = solution[i][j];
+            // solution[i][j] < 0 ? solution[i][j] = rand() % cities : solution[i][j] = solution[i][j];
+        }
+        cout << endl;
+    }
+    cout << endl;
 }
 
 void psotsp::evaluation()
 {
+    cout << "___________" << endl;
+    e_count++;
+    sol2path();
+    int length = 0;
+    for (int i = 0; i < popsize; i++)
+    {
+        // calculate the path length to fitness value.
+        length = 0;
+        for (int j = 0; j < cities - 1; j++)
+            length += distance(path[i][j], path[i][j + 1]);
+        length += distance(path[i][cities - 1], path[i][0]);
+        fitness[i] = length;
+
+        // update gb pb
+        if (length < personal_fit[i])
+        {
+            personal_fit[i] = length;
+            personal_best[i] = path[i];
+        }
+        if (length < global_fit)
+        {
+            global_fit = length;
+            global_best = path[i];
+        }
+    }
 }

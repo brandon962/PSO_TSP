@@ -8,7 +8,6 @@
 #include <cfloat>
 #include <cmath>
 
-
 using namespace std;
 
 class psotsp
@@ -18,24 +17,26 @@ public:
     int iters;
     int popsize;
     int cities;
+    double decay;
     double alpha;
     double beta;
     string inputfile;
     int e_count;
+    int p_count;
     FILE *fp;
 
     d2d solution;
     d2d speed;
     i2d path;
     d1d fitness;
-    d1d global_best;
+    i1d global_best;
     double global_fit;
-    d2d personal_best;
+    i2d personal_best;
     d1d personal_fit;
     i2d place;
     i1d choosen;
 
-    psotsp(int runs, int iters, int popsize, int cities, double alpha, double beta, string inputfile);
+    psotsp(int runs, int iters, int popsize, int cities, double decay, double alpha, double beta, string inputfile);
     ~psotsp();
 
     void initialvector();
@@ -45,8 +46,7 @@ public:
     double distance(int x1, int x2);
     void printAllpath();
     void sol2path();
+    void printALLfit();
 
     void run();
 };
-
-
