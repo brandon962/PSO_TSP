@@ -24,6 +24,7 @@ public:
     int e_count;
     int p_count;
     FILE *fp;
+    int max_speed;
 
     d2d solution;
     d2d speed;
@@ -36,7 +37,7 @@ public:
     i2d place;
     i1d choosen;
 
-    psotsp(int runs, int iters, int popsize, int cities, double decay, double alpha, double beta, string inputfile);
+    psotsp(int runs, int iters, int popsize, int cities, double decay,int max_speed, double alpha, double beta, string inputfile);
     ~psotsp();
 
     void initialvector();

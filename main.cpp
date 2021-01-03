@@ -6,8 +6,8 @@ using namespace std;
 
 int main()
 {
-    psotsp test = psotsp(1, 10, 5, 51, 0.5, 0.7, 0.7, "eil51.txt");
+    cout << "?" << endl;
+    psotsp test = psotsp(30, 100, 50, 51, 0.8, 20, 0.7, 0.3, "eil51.txt");
     test.run();
-
     return 0;
 }

@@ -1,5 +1,6 @@
 #include "psotsp.h"
-psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _decay, double _alpha, double _beta, string _inputfile)
+using namespace std;
+psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _decay, int _max_speed, double _alpha, double _beta, string _inputfile)
 {
     srand(time(NULL));
     runs = _runs;
@@ -9,6 +10,7 @@ psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _decay
     decay = _decay;
     alpha = _alpha;
     beta = _beta;
+    max_speed = _max_speed;
     inputfile = _inputfile;
     cout << inputfile << endl;
 }
@@ -16,6 +18,7 @@ psotsp::~psotsp() {}
 
 void psotsp::run()
 {
+    int avg = 0;
     for (int i = 0; i < runs; i++)
     {
         initialization();
@@ -23,9 +26,16 @@ void psotsp::run()
         {
             transistion();
             evaluation();
-            printALLfit();
+            // printAllpath();
+            // printALLfit();
         }
+        avg += global_fit;
+        cout << global_fit << endl;
     }
+    avg/=runs;
+    cout << endl;
+    cout << endl;
+    cout << avg <<endl;
 }
 
 void psotsp::initialization()
@@ -49,7 +59,7 @@ void psotsp::initialization()
         for (int j = 0; j < cities; j++)
         {
             r1 = rand() % 2;
-            r2 = rand() % ((int)cities / 5 - 1) + 1;
+            r2 = rand() % max_speed + 1;
             if (r1 == 0)
                 r1 = -1;
             solution[i][j] = j;
@@ -90,9 +100,9 @@ void psotsp::initialization()
     }
 
     global_fit = DBL_MAX;
-    printAllpath();
+    // printAllpath();
     evaluation();
-    printALLfit();
+    // printALLfit();
     e_count = 0;
     p_count = 0;
 }
@@ -112,7 +122,7 @@ void psotsp::sol2path()
         // path[i][j] = (int)solution[i][j] with no repeat, if repeat path[i][j] still be -1
         for (int j = 0; j < cities; j++)
         {
-            cout << (int)solution[i][j] << endl;
+            // cout << (int)solution[i][j] << endl;
             if (choosen[(int)solution[i][j]] == 0)
             {
                 choosen[(int)solution[i][j]] = 1;
@@ -124,11 +134,36 @@ void psotsp::sol2path()
         {
             if (path[i][j] == -1)
             {
-                r1 = rand() & cities;
-                while (choosen[r1 % (cities)] == 1)
+                // int r;
+                // for (int k = 0; k < cities; k++)
+                // {
+                //     if( choosen[k] ==0)
+                //     {
+                //         r = k;
+                //         break;
+                //     }
+                // }
+                // choosen[r] = 1;
+                // path[i][j] = r;
+                r1 = rand() % cities;
+                while (choosen[r1] == 1)
+                {
                     r1++;
+                    if (r1 == cities)
+                        r1 = 0;
+                }
                 choosen[r1] = 1;
                 path[i][j] = r1;
+
+                // r1 = rand() & cities;
+                // while (choosen[r1] == 1)
+                // {
+                //     r1++;
+                //     if (r1 > cities-1);
+                //         r1 = 0;
+                // }
+                // choosen[r1] = 1;
+                // path[i][j] = r1;
             }
         }
     }
@@ -136,6 +171,12 @@ void psotsp::sol2path()
 
 void psotsp::printAllpath()
 {
+    for (int i = 0; i < popsize; i++)
+    {
+        for (int j = 0; j < cities; j++)
+            cout << path[i][j] + 1 << " ";
+        cout << path[i][0] + 1 << endl;
+    }
     sol2path();
     for (int i = 0; i < popsize; i++)
     {
@@ -183,6 +224,8 @@ void psotsp::transistion()
             speed[i][j] += alpha * r1 * (global_best[j] - solution[i][j]);
             r1 = (rand() / (RAND_MAX + 1.0));
             speed[i][j] += beta * r1 * (personal_best[i][j] - solution[i][j]);
+            speed[i][j] < -1 * max_speed ? speed[i][j] = -1 * max_speed : speed[i][j] = speed[i][j];
+            speed[i][j] > max_speed ? speed[i][j] = max_speed : speed[i][j] = speed[i][j];
         }
     }
 
@@ -194,19 +237,20 @@ void psotsp::transistion()
             // cout << solution[i][j] << " ";
             solution[i][j] += speed[i][j];
             if (solution[i][j] < 0)
-                solution[i][j] = rand()%cities;
-            cout << solution[i][j] << " ";
+                solution[i][j] = rand() % cities;
+            // cout << solution[i][j] +1<< " ";
             // solution[i][j] > (cities + 1) ? solution[i][j] = rand() % cities : solution[i][j] = solution[i][j];
             // solution[i][j] < 0 ? solution[i][j] = rand() % cities : solution[i][j] = solution[i][j];
         }
-        cout << endl;
+        // cout << endl;
     }
-    cout << endl;
+    // cout << endl;
+    sol2path();
 }
 
 void psotsp::evaluation()
 {
-    cout << "___________" << endl;
+    // cout << "___________" << endl;
     e_count++;
     sol2path();
     int length = 0;
@@ -223,12 +267,19 @@ void psotsp::evaluation()
         if (length < personal_fit[i])
         {
             personal_fit[i] = length;
-            personal_best[i] = path[i];
+            for (int j = 0; j < cities; j++)
+                personal_best[i][j] = path[i][j];
         }
         if (length < global_fit)
         {
             global_fit = length;
-            global_best = path[i];
+            for (int j = 0; j < cities; j++)
+                global_best[j] = path[i][j];
         }
     }
+    // cout << global_fit << " : ";
+    // for (int i = 0; i < cities; i++)
+    //     cout << global_best[i]+1 << " ";
+    // cout << global_best[0]+1;
+    // cout << endl;
 }
