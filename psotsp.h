@@ -5,6 +5,9 @@
 #include "myVector.h"
 #include <fstream>
 #include <ctime>
+#include <cfloat>
+#include <cmath>
+
 
 using namespace std;
 
@@ -22,12 +25,15 @@ public:
     FILE *fp;
 
     d2d solution;
+    d2d speed;
+    i2d path;
     d1d fitness;
     d1d global_best;
     double global_fit;
     d2d personal_best;
     d1d personal_fit;
     i2d place;
+    i1d choosen;
 
     psotsp(int runs, int iters, int popsize, int cities, double alpha, double beta, string inputfile);
     ~psotsp();
@@ -36,6 +42,9 @@ public:
     void initialization();
     void transistion();
     void evaluation();
+    double distance(int x1, int x2);
+    void printAllpath();
+    void sol2path();
 
     void run();
 };
