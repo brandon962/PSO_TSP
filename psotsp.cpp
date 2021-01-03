@@ -14,7 +14,10 @@ psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _decay
     inputfile = _inputfile;
     cout << inputfile << endl;
 }
-psotsp::~psotsp() {}
+psotsp::~psotsp()
+{
+    cout << "bye" << endl;
+}
 
 void psotsp::run()
 {
@@ -32,10 +35,10 @@ void psotsp::run()
         avg += global_fit;
         cout << global_fit << endl;
     }
-    avg/=runs;
+    avg /= runs;
     cout << endl;
     cout << endl;
-    cout << avg <<endl;
+    cout << avg << endl;
 }
 
 void psotsp::initialization()
@@ -71,7 +74,7 @@ void psotsp::initialization()
     }
 
     int a, b;
-    double minpath = DBL_MAX;
+    double minpath = 100000;
     double dtemp;
     for (int i = 0; i < cities; i++)
     {
@@ -99,7 +102,7 @@ void psotsp::initialization()
         }
     }
 
-    global_fit = DBL_MAX;
+    global_fit = 100000;
     // printAllpath();
     evaluation();
     // printALLfit();
@@ -198,7 +201,7 @@ void psotsp::initialvector()
     fitness.assign(popsize, 0);
     global_best.assign(cities, 0);
     personal_best.assign(popsize, i1d(cities, 0));
-    personal_fit.assign(popsize, DBL_MAX);
+    personal_fit.assign(popsize, 100000);
     place.assign(cities, i1d(2, 0));
     speed.assign(popsize, d1d(cities, 0));
     choosen.assign(cities, 0);
