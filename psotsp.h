@@ -1,7 +1,10 @@
 // #pragma once
+#define _CRT_SECURE_NO_DEPRECATE
 #include <string>
 #include <iostream>
 #include "myVector.h"
+#include <fstream>
+#include <ctime>
 
 using namespace std;
 
@@ -11,10 +14,12 @@ public:
     int runs;
     int iters;
     int popsize;
-    int sol_size;
+    int cities;
     double alpha;
     double beta;
     string inputfile;
+    int e_count;
+    FILE *fp;
 
     d2d solution;
     d1d fitness;
@@ -22,9 +27,9 @@ public:
     double global_fit;
     d2d personal_best;
     d1d personal_fit;
-    d2d place;
+    i2d place;
 
-    psotsp(int runs, int iters, int popsize, int sol_size, double alpha, double beta, string inputfile);
+    psotsp(int runs, int iters, int popsize, int cities, double alpha, double beta, string inputfile);
     ~psotsp();
 
     void initialvector();

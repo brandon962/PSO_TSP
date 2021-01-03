@@ -4,7 +4,7 @@ psotsp::psotsp(int _runs, int _iters, int _popsize, int _sol_size, double _alpha
     runs = _runs;
     iters = _iters;
     popsize = _popsize;
-    sol_size = _sol_size;
+    cities = _sol_size;
     alpha = _alpha;
     beta = _beta;
     inputfile = _inputfile;
@@ -27,18 +27,41 @@ void psotsp::run()
 
 void psotsp::initialization()
 {
+    srand(time(NULL));
     initialvector();
+    e_count = 0;
+    // readfile
+    fp = fopen(inputfile.c_str(), "r");
+        for (int i = 0; i < cities; i++)
+            fscanf(fp, "%d %d %d", &place[i][0], &place[i][0], &place[i][1]);
+    fclose(fp);
 
+    for(int i = 0; i < popsize; i++)
+    {
+        for (int j = 0; j < cities; j++)
+        {
+            solution[i][j] = j;
+        }
+    }
+    
 }
 
 void psotsp::initialvector()
 {
-    solution.assign(popsize,d1d(sol_size,0));
+    solution.assign(popsize,d1d(cities,0));
     fitness.assign(popsize,0);
-    global_best.assign(sol_size,0);
-    personal_best.assign(popsize,d1d(sol_size,0));
+    global_best.assign(cities,0);
+    personal_best.assign(popsize,d1d(cities,0));
     personal_fit.assign(popsize,0);
-    place.assign(sol_size,d1d(2,0));
+    place.assign(cities,i1d(2,0));
 }
 
+void psotsp::transistion()
+{
 
+}
+
+void psotsp::evaluation()
+{
+
+}
